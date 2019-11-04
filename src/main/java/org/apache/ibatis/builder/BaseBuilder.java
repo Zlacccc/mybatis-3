@@ -45,7 +45,13 @@ public abstract class BaseBuilder {
   public Configuration getConfiguration() {
     return configuration;
   }
-
+  /**
+   * 创建正则表达式
+   *
+   * @param regex 指定表达式
+   * @param defaultValue 默认表达式
+   * @return 正则表达式
+   */
   protected Pattern parseExpression(String regex, String defaultValue) {
     return Pattern.compile(regex == null ? defaultValue : regex);
   }
@@ -73,7 +79,7 @@ public abstract class BaseBuilder {
       throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
     }
   }
-
+ //解析对应的 ResultSetType 类型
   protected ResultSetType resolveResultSetType(String alias) {
     if (alias == null) {
       return null;

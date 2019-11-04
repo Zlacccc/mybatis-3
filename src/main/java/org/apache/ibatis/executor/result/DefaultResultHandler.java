@@ -24,9 +24,15 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ *
+ *
+ * 结果的处理，被 resultset 包所调用。
+ * 实现 ResultHandler 接口，默认的 ResultHandler 的实现类。
  */
 public class DefaultResultHandler implements ResultHandler<Object> {
-
+  /**
+   * 结果数组
+   */
   private final List<Object> list;
 
   public DefaultResultHandler() {

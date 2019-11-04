@@ -27,12 +27,21 @@ public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";
 
   private final ExpressionEvaluator evaluator;
+  /**
+   * 集合的表达式
+   */
   private final String collectionExpression;
   private final SqlNode contents;
   private final String open;
   private final String close;
   private final String separator;
+  /**
+   * 集合项
+   */
   private final String item;
+  /**
+   * 索引变量
+   */
   private final String index;
   private final Configuration configuration;
 
@@ -48,25 +57,43 @@ public class ForEachSqlNode implements SqlNode {
     this.configuration = configuration;
   }
 
+
+  /**
+   * <select id="getSubjectList" parameterType="List" resultType="List">
+       SELECT id FROM subject
+          WHERE id IN
+         <foreach collection="ids" index="idx" item="item" open="("  close=")" separator=",">
+          #{item}
+        </foreach>
+   </select>
+   * @param context
+   * @return
+   */
   @Override
   public boolean apply(DynamicContext context) {
     Map<String, Object> bindings = context.getBindings();
+    // <1> 获得遍历的集合的 Iterable 对象，用于遍历。
     final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings);
     if (!iterable.iterator().hasNext()) {
       return true;
     }
     boolean first = true;
+    // <2> 添加 open 到 SQL 中
     applyOpen(context);
     int i = 0;
     for (Object o : iterable) {
+      // <3> 记录原始的 context 对象
       DynamicContext oldContext = context;
+      // <4> 生成新的 context
       if (first || separator == null) {
         context = new PrefixedContext(context, "");
       } else {
         context = new PrefixedContext(context, separator);
       }
+      // <5> 获得唯一编号
       int uniqueNumber = context.getUniqueNumber();
       // Issue #709
+      // <6> 绑定到 context 中
       if (o instanceof Map.Entry) {
         @SuppressWarnings("unchecked")
         Map.Entry<Object, Object> mapEntry = (Map.Entry<Object, Object>) o;
@@ -76,14 +103,19 @@ public class ForEachSqlNode implements SqlNode {
         applyIndex(context, i, uniqueNumber);
         applyItem(context, o, uniqueNumber);
       }
+      // <7> 执行 contents 的应用
       contents.apply(new FilteredDynamicContext(configuration, context, index, item, uniqueNumber));
+      // <8> 判断 prefix 是否已经插入
       if (first) {
         first = !((PrefixedContext) context).isPrefixApplied();
       }
+      // <9> 恢复原始的 context 对象
       context = oldContext;
       i++;
     }
+    // <10> 添加 close 到 SQL 中
     applyClose(context);
+    // <11> 移除 index 和 item 对应的绑定
     context.getBindings().remove(item);
     context.getBindings().remove(index);
     return true;
@@ -197,10 +229,13 @@ public class ForEachSqlNode implements SqlNode {
 
     @Override
     public void appendSql(String sql) {
+      // 如果未应用 prefix ，并且，方法参数 sql 非空
+      // 则添加 prefix 到 delegate 中，并标记 prefixApplied 为 true ，表示已经应用
       if (!prefixApplied && sql != null && sql.trim().length() > 0) {
         delegate.appendSql(prefix);
         prefixApplied = true;
       }
+      // 添加 sql 到 delegate 中
       delegate.appendSql(sql);
     }
 

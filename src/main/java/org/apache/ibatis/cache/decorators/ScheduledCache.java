@@ -19,11 +19,21 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ *
+ * 定时清空整个缓存
  */
 public class ScheduledCache implements Cache {
-
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+  /**
+   * 清空间隔，单位：毫秒
+   */
   protected long clearInterval;
+  /**
+   * 最后清空时间，单位：毫秒
+   */
   protected long lastClear;
 
   public ScheduledCache(Cache delegate) {
@@ -43,6 +53,7 @@ public class ScheduledCache implements Cache {
 
   @Override
   public int getSize() {
+    // 判断是否要全部清空
     clearWhenStale();
     return delegate.getSize();
   }
@@ -66,6 +77,7 @@ public class ScheduledCache implements Cache {
 
   @Override
   public void clear() {
+    //记录清空的时间
     lastClear = System.currentTimeMillis();
     delegate.clear();
   }

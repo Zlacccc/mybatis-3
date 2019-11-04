@@ -45,8 +45,13 @@ import org.apache.ibatis.session.SqlSession;
  * @author Kazuki Shimizu
  */
 public class MapperMethod {
-
+  /**
+   * SqlCommand 对象   MapperMethod 的内部静态类，SQL 命令
+   */
   private final SqlCommand command;
+  /**
+   * MethodSignature 对象
+   */
   private final MethodSignature method;
 
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
@@ -58,7 +63,10 @@ public class MapperMethod {
     Object result;
     switch (command.getType()) {
       case INSERT: {
+        // 转换参数
         Object param = method.convertArgsToSqlCommandParam(args);
+        // 执行 INSERT 操作
+        // 转换 rowCount
         result = rowCountResult(sqlSession.insert(command.getName(), param));
         break;
       }
@@ -73,18 +81,25 @@ public class MapperMethod {
         break;
       }
       case SELECT:
+        // <2.1> 无返回，并且有 ResultHandler 方法参数，则将查询的结果，提交给 ResultHandler 进行处理
         if (method.returnsVoid() && method.hasResultHandler()) {
           executeWithResultHandler(sqlSession, args);
           result = null;
+          // <2.2> 执行查询，返回列表
         } else if (method.returnsMany()) {
           result = executeForMany(sqlSession, args);
+          // <2.3> 执行查询，返回 Map
         } else if (method.returnsMap()) {
           result = executeForMap(sqlSession, args);
+          // <2.4> 执行查询，返回 Cursor
         } else if (method.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
+          // <2.5> 执行查询，返回单个对象
         } else {
+          // 转换参数
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
+          // 查询单条
           if (method.returnsOptional()
               && (result == null || !method.getReturnType().equals(result.getClass()))) {
             result = Optional.ofNullable(result);
@@ -147,6 +162,7 @@ public class MapperMethod {
       result = sqlSession.selectList(command.getName(), param);
     }
     // issue #510 Collections & arrays support
+    // 封装 Array 或 Collection 结果
     if (!method.getReturnType().isAssignableFrom(result.getClass())) {
       if (method.getReturnType().isArray()) {
         return convertToArray(result);
@@ -190,7 +206,7 @@ public class MapperMethod {
     }
   }
 
-  private <K, V> Map<K, V> executeForMap(SqlSession sqlSession, Object[] args) {
+  private <K, V> Map<K, V>  executeForMap(SqlSession sqlSession, Object[] args) {
     Map<K, V> result;
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
@@ -220,22 +236,26 @@ public class MapperMethod {
 
     private final String name;
     private final SqlCommandType type;
-
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
       final String methodName = method.getName();
       final Class<?> declaringClass = method.getDeclaringClass();
+      // <1> 获得 MappedStatement 对象
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
+      // <2> 找不到 MappedStatement
       if (ms == null) {
+        // 如果有 @Flush 注解，则标记为 FLUSH 类型
         if (method.getAnnotation(Flush.class) != null) {
           name = null;
           type = SqlCommandType.FLUSH;
-        } else {
+        } else {// 抛出 BindingException 异常，如果找不到 MappedStatement
           throw new BindingException("Invalid bound statement (not found): "
               + mapperInterface.getName() + "." + methodName);
         }
+        // <3> 找到 MappedStatement
       } else {
         name = ms.getId();
+        // 获得 type
         type = ms.getSqlCommandType();
         if (type == SqlCommandType.UNKNOWN) {
           throw new BindingException("Unknown execution method for: " + name);
@@ -253,12 +273,16 @@ public class MapperMethod {
 
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
         Class<?> declaringClass, Configuration configuration) {
+      // <1> 获得编号
       String statementId = mapperInterface.getName() + "." + methodName;
+      // <2> 如果有，获得 MappedStatement 对象，并返回
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
+        // 如果没有，并且当前方法就是 declaringClass 声明的，则说明真的找不到
       } else if (mapperInterface.equals(declaringClass)) {
         return null;
       }
+      // 遍历父接口，继续获得 MappedStatement 对象
       for (Class<?> superInterface : mapperInterface.getInterfaces()) {
         if (declaringClass.isAssignableFrom(superInterface)) {
           MappedStatement ms = resolveMappedStatement(superInterface, methodName,

@@ -50,14 +50,25 @@ import org.apache.ibatis.io.Resources;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *
+ * TypeHandler 注册表，相当于管理 TypeHandler 的容器，从其中能获取到对应的 TypeHandler 。
  */
 public final class TypeHandlerRegistry {
-
+  /**
+   * JDBC Type 和 {@link TypeHandler} 的映射
+   *
+   * {@link #register(JdbcType, TypeHandler)}
+   */
   private final Map<JdbcType, TypeHandler<?>>  jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
   private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>();
   private final TypeHandler<Object> unknownTypeHandler = new UnknownTypeHandler(this);
   private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>();
-
+/**
+ * 空 TypeHandler 集合的标识，即使 {@link #TYPE_HANDLER_MAP} 中，某个 KEY1 对应的 Map<JdbcType, TypeHandler<?>> 为空。
+ *
+ * @see #getJdbcHandlerMap(Type)
+ */
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
 
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
@@ -347,8 +358,10 @@ public final class TypeHandlerRegistry {
   }
 
   private <T> void register(Type javaType, TypeHandler<? extends T> typeHandler) {
+    // 获得 MappedJdbcTypes 注解
     MappedJdbcTypes mappedJdbcTypes = typeHandler.getClass().getAnnotation(MappedJdbcTypes.class);
     if (mappedJdbcTypes != null) {
+      // 遍历 MappedJdbcTypes 注册的 JDBC Type 进行注册
       for (JdbcType handledJdbcType : mappedJdbcTypes.value()) {
         register(javaType, handledJdbcType, typeHandler);
       }
@@ -390,13 +403,16 @@ public final class TypeHandlerRegistry {
 
   public void register(Class<?> typeHandlerClass) {
     boolean mappedTypeFound = false;
+    // <3> 获得 @MappedTypes 注解
     MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
     if (mappedTypes != null) {
+      // 遍历注解的 Java Type 数组，逐个进行注册
       for (Class<?> javaTypeClass : mappedTypes.value()) {
         register(javaTypeClass, typeHandlerClass);
         mappedTypeFound = true;
       }
     }
+    // <4> 未使用 @MappedTypes 注解，则直接注册
     if (!mappedTypeFound) {
       register(getInstance(null, typeHandlerClass));
     }
@@ -422,10 +438,11 @@ public final class TypeHandlerRegistry {
 
   @SuppressWarnings("unchecked")
   public <T> TypeHandler<T> getInstance(Class<?> javaTypeClass, Class<?> typeHandlerClass) {
+    // 获得 Class 类型的构造方法
     if (javaTypeClass != null) {
       try {
         Constructor<?> c = typeHandlerClass.getConstructor(Class.class);
-        return (TypeHandler<T>) c.newInstance(javaTypeClass);
+        return (TypeHandler<T>) c.newInstance(javaTypeClass);// 符合这个条件的，例如 EnumTypeHandler
       } catch (NoSuchMethodException ignored) {
         // ignored
       } catch (Exception e) {
@@ -443,11 +460,14 @@ public final class TypeHandlerRegistry {
   // scan
 
   public void register(String packageName) {
+    // 扫描指定包下的所有 TypeHandler 类
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
     Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
+    // 遍历 TypeHandler 数组，发起注册
     for (Class<?> type : handlerSet) {
       //Ignore inner classes and interfaces (including package-info.java) and abstract classes
+      // 排除匿名类、接口、抽象类
       if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
         register(type);
       }

@@ -30,6 +30,10 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ *
+ * 在调用 SqlSession 相应方法执行数据库操作时，需要指定映射文件中定义的 SQL 节点，如果出现拼写错误，我们只能在运行时才能发现相应的异常。
+ * 为了尽早发现这种错误，MyBatis 通过 Binding 模块，将用户自定义的 Mapper 接口与映射配置文件关联起来，
+ * 系统可以通过调用自定义 Mapper 接口中的方法执行相应的 SQL 语句完成数据库操作，从而避免上述问题。
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
@@ -38,8 +42,16 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC;
   private static final Constructor<Lookup> lookupConstructor;
   private static final Method privateLookupInMethod;
+  /**
+   * SqlSession 对象
+   */
   private final SqlSession sqlSession;
   private final Class<T> mapperInterface;
+  /**
+   * 方法与 MapperMethod 的映射
+   *
+   * 从 {@link MapperProxyFactory#methodCache} 传递过来
+   */
   private final Map<Method, MapperMethod> methodCache;
 
   public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethod> methodCache) {
@@ -77,6 +89,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+      // <1> 如果是 Object 定义的方法，直接调用
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else if (method.isDefault()) {
@@ -89,7 +102,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
     }
+    // <3.1> 获得 MapperMethod 对象
     final MapperMethod mapperMethod = cachedMapperMethod(method);
+    // <3.2> 执行 MapperMethod 方法
     return mapperMethod.execute(sqlSession, args);
   }
 

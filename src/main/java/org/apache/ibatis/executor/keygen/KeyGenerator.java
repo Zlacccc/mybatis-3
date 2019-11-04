@@ -22,11 +22,14 @@ import org.apache.ibatis.mapping.MappedStatement;
 
 /**
  * @author Clinton Begin
+ *
+ * 实现数据库主键生成( 获得 )的功能 KeyGenerator 类的命名虽然包含 Generator ，
+ * 但是目前 MyBatis 默认的 KeyGenerator 实现类，都是基于数据库来实现主键自增的功能。
  */
 public interface KeyGenerator {
-
+  // SQL 执行前
   void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
-
+  // SQL 执行后
   void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 
 }

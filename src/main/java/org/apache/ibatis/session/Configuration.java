@@ -157,7 +157,9 @@ public class Configuration {
   protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
   protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
   protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
-
+  /**
+   * 已加载资源( Resource )集合
+   */
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
 
@@ -309,7 +311,9 @@ public class Configuration {
   public void addLoadedResource(String resource) {
     loadedResources.add(resource);
   }
-
+  /**
+   * 已加载资源( Resource )集合
+   */
   public boolean isResourceLoaded(String resource) {
     return loadedResources.contains(resource);
   }
@@ -576,31 +580,45 @@ public class Configuration {
   }
 
   public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+    // 创建 ParameterHandler 对象
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
+    // 应用插件
     parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
     return parameterHandler;
   }
 
-  public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler,
-      ResultHandler resultHandler, BoundSql boundSql) {
-    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
-    resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
-    return resultSetHandler;
-  }
-
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    // <1> 创建 RoutingStatementHandler 对象
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
     return statementHandler;
+  }
+
+  public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler,
+                                              ResultHandler resultHandler, BoundSql boundSql) {
+    ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
+    resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
+    return resultSetHandler;
   }
 
   public Executor newExecutor(Transaction transaction) {
     return newExecutor(transaction, defaultExecutorType);
   }
 
+
+  /**
+   * 创建 Executor 对象
+   *
+   * @param transaction 事务对象
+   * @param executorType 执行器类型
+   * @return Executor 对象
+   */
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
-    executorType = executorType == null ? defaultExecutorType : executorType;
+    // <1> 获得执行器类型  可以通过在 mybatis-config.xml 配置文件   value 有三种类型：SIMPLE REUSE BATCH <setting name="defaultExecutorType" value="" />
+
+      executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
+    // <2> 创建对应实现的 Executor 对象 默认为 SimpleExecutor 对象。
     Executor executor;
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
@@ -609,9 +627,11 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    // <3> 如果开启缓存，创建 CachingExecutor 对象，进行包装
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // <4> 应用插件
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
@@ -749,9 +769,11 @@ public class Configuration {
   }
 
   public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+    // 校验，保证所有 MappedStatement 已经构造完毕
     if (validateIncompleteStatements) {
       buildAllStatements();
     }
+    // 获取 MappedStatement 对象
     return mappedStatements.get(id);
   }
 

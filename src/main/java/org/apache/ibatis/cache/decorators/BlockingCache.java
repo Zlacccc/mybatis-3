@@ -32,11 +32,23 @@ import org.apache.ibatis.cache.CacheException;
  *
  * @author Eduardo Macarron
  *
+ * 这里的阻塞比较特殊，当线程去获取缓存值时，如果不存在，则会阻塞后续的其他线程去获取该缓存。
+ *
+ * 为什么这么有这样的设计呢？因为当线程 A 在获取不到缓存值时，一般会去设置对应的缓存值，这样就避免其他也需要该缓存的线程 B、C 等，重复添加缓存。
+ *
  */
 public class BlockingCache implements Cache {
-
+  /**
+   * 阻塞等待超时时间
+   */
   private long timeout;
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+  /**
+   * 缓存键与 ReentrantLock 对象的映射
+   */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 
   public BlockingCache(Cache delegate) {
@@ -57,16 +69,20 @@ public class BlockingCache implements Cache {
   @Override
   public void putObject(Object key, Object value) {
     try {
+      //添加缓存
       delegate.putObject(key, value);
     } finally {
+      // 释放锁
       releaseLock(key);
     }
   }
 
   @Override
   public Object getObject(Object key) {
+    //获取锁
     acquireLock(key);
     Object value = delegate.getObject(key);
+    //如果能取到缓存，释放锁，否则 ，阻塞
     if (value != null) {
       releaseLock(key);
     }
@@ -90,7 +106,9 @@ public class BlockingCache implements Cache {
   }
 
   private void acquireLock(Object key) {
+    // 获得 ReentrantLock 对象。
     Lock lock = getLockForKey(key);
+    // 获得锁，直到超时
     if (timeout > 0) {
       try {
         boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
@@ -107,6 +125,7 @@ public class BlockingCache implements Cache {
 
   private void releaseLock(Object key) {
     ReentrantLock lock = locks.get(key);
+    // 如果当前线程持有，进行释放
     if (lock.isHeldByCurrentThread()) {
       lock.unlock();
     }
