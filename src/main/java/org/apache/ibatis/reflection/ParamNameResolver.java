@@ -28,6 +28,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+//ParamNameResolver 处理 Mapper 接口中定义的方法的参数列表
 public class ParamNameResolver {
 
   private static final String GENERIC_NAME_PREFIX = "param";
@@ -45,31 +46,40 @@ public class ParamNameResolver {
    * <li>aMethod(int a, RowBounds rb, int b) -&gt; {{0, "0"}, {2, "1"}}</li>
    * </ul>
    */
+
+  //记录了参数在参数列表中的位置索引与参数名称之间的对应关系，其中key表示参数在参数列表中的索引位置，value 表示参数名称
   private final SortedMap<Integer, String> names;
 
   private boolean hasParamAnnotation;
 
   public ParamNameResolver(Configuration config, Method method) {
+    //／获取参数列表中每个参数的类型
     final Class<?>[] paramTypes = method.getParameterTypes();
+    //获取参数列表上的注解
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    //该集合用于记录参数索引与参数名称的对应关系
     final SortedMap<Integer, String> map = new TreeMap<>();
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
-    for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+    for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {//遍历方法所有参数
+      //如采参数是 RowBounds 类型或 ResultHandler 类型，跳过对该参数的分析
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
       }
       String name = null;
+      //遍历该参数对应的注解集合
       for (Annotation annotation : paramAnnotations[paramIndex]) {
         if (annotation instanceof Param) {
+          //@Param 注解出现过一次，就将 hasParamAnnotation 初始化为 true
           hasParamAnnotation = true;
-          name = ((Param) annotation).value();
+          name = ((Param) annotation).value();//获取自 Param 注解指定的参数名称
           break;
         }
       }
       if (name == null) {
         // @Param was not specified.
+        //该参数没有对应的＠Param注解，则根据配置决定是否使用参数实际名称作为其名称
         if (config.isUseActualParamName()) {
           name = getActualParamName(method, paramIndex);
         }
@@ -109,11 +119,11 @@ public class ParamNameResolver {
    */
   public Object getNamedParams(Object[] args) {
     final int paramCount = names.size();
-    if (args == null || paramCount == 0) {
+    if (args == null || paramCount == 0) {//元参数，返回 null
       return null;
-    } else if (!hasParamAnnotation && paramCount == 1) {
+    } else if (!hasParamAnnotation && paramCount == 1) {//未使用自 Param 且只有一个参数
       return args[names.firstKey()];
-    } else {
+    } else {//处理使用Param 注解指定了参数名称或有多个参数的情况
       final Map<String, Object> param = new ParamMap<>();
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {

@@ -69,7 +69,7 @@ public class XMLStatementBuilder extends BaseBuilder {
       return;
     }
     String nodeName = context.getNode().getNodeName();
-    // <8> 获得 SQL 对应的 SqlCommandType 枚举值
+    // 根据 SQL 节点的名称决定其 SqlCommandType
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
     // <9> 获得各种属性
@@ -78,7 +78,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // Include Fragments before parsing
-    // <10> 创建 XMLIncludeTransformer 对象，并替换 <include /> 标签相关的内容
+    // 在解析 SQL 语句 之前，先处理其中的 ＜ include ＞节点
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode());
 
@@ -107,7 +107,7 @@ public class XMLStatementBuilder extends BaseBuilder {
           configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))// 其次，基于全局的 useGeneratedKeys 配置 + 是否为插入语句类型
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
-    // <12> 创建 SqlSource
+    // 下面是解析 SQL 节点的逻粹，也是 parseStatementNode （）方法的核心调用 LanguageDriver. createSqlSource （）方法创建 SqlSource 对象
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
     // <7> 获得 statementType 对应的枚举值
     StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
@@ -125,6 +125,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
+    //获取 keyProperty 、 resultSets 、 keyColumn 三个属性
     String keyProperty = context.getStringAttribute("keyProperty");
     String keyColumn = context.getStringAttribute("keyColumn");
     String resultSets = context.getStringAttribute("resultSets");

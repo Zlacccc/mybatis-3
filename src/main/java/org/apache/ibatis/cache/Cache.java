@@ -44,19 +44,21 @@ public interface Cache {
   /**
    * @return The identifier of this cache
    */
-  String getId();
+  String getId();//该缓存对象的id
 
   /**
    * @param key Can be any object but usually it is a {@link CacheKey}
    * @param value The result of a select.
    */
+
+  //向缓存中添加数据，一般情况下， key 是 CacheKey , value 是查询结果
   void putObject(Object key, Object value);
 
   /**
    * @param key The key
    * @return The object stored in the cache.
    */
-  Object getObject(Object key);
+  Object getObject(Object key); //根据指定的 key ，在缓存中查找对应的结果对象
 
   /**
    * As of 3.3.0 this method is only called during a rollback
@@ -72,19 +74,19 @@ public interface Cache {
    * @param key The key
    * @return Not used
    */
-  Object removeObject(Object key);
+  Object removeObject(Object key);//删除 key 对应的缓存项
 
   /**
    * Clears this cache instance.
    */
-  void clear();
+  void clear();//清空缓存
 
   /**
    * Optional. This method is not called by the core.
    *
    * @return The number of elements stored in the cache (not its capacity).
    */
-  int getSize();
+  int getSize();//／缓存项的个数，该方法不会被 MyBatis 核心代码使用，所以可提供空实现
 
   /**
    * Optional. As of 3.2.6 this method is no longer called by the core.
@@ -93,6 +95,7 @@ public interface Cache {
    *
    * @return A ReadWriteLock
    */
+  //获取读写锁，该方法不会被 MyBatis 核心代码使用，所以可提供空实现
   default ReadWriteLock getReadWriteLock() {
     return null;
   }

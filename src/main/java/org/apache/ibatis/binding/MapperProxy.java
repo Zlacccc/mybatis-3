@@ -48,9 +48,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private final SqlSession sqlSession;
   private final Class<T> mapperInterface;
   /**
-   * 方法与 MapperMethod 的映射
-   *
-   * 从 {@link MapperProxyFactory#methodCache} 传递过来
+   用于缓存 MapperMethod 对象，其 中 key 是 Mapper 接 口中 方 法对应 的 Method 对象， value 是对应 的
+    MapperMethod 对象。 MapperMethod 对象会完成参数转换以及 SQL 语句的执行功能
+    需要注意的是， MapperMethod 中并不记录任何状态相关的信息，所以 可以在多个代理对象之 间 共享
    */
   private final Map<Method, MapperMethod> methodCache;
 

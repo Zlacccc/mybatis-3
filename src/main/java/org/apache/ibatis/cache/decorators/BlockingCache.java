@@ -32,10 +32,9 @@ import org.apache.ibatis.cache.CacheException;
  *
  * @author Eduardo Macarron
  *
- * 这里的阻塞比较特殊，当线程去获取缓存值时，如果不存在，则会阻塞后续的其他线程去获取该缓存。
  *
- * 为什么这么有这样的设计呢？因为当线程 A 在获取不到缓存值时，一般会去设置对应的缓存值，这样就避免其他也需要该缓存的线程 B、C 等，重复添加缓存。
  *
+ * 阻塞版本的缓存装饰器，它会保证只有一个线程到数据库中查找指定 key对应的数据。
  */
 public class BlockingCache implements Cache {
   /**
@@ -47,7 +46,7 @@ public class BlockingCache implements Cache {
    */
   private final Cache delegate;
   /**
-   * 缓存键与 ReentrantLock 对象的映射
+   * 缓存键与 ReentrantLock 对象的映射  每个 key 都有对应的 ReentrantLock 对象
    */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 

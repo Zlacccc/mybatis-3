@@ -149,6 +149,8 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  //XMLConfigBuilder.settingsAsProperties（）方法负责解析＜settings＞节点，在＜settings＞节点下的
+  //配置是 MyBatis 全局性的配置，它们会改变 MyBatis 的运行时行为，
   private Properties settingsAsProperties(XNode context) {
     // 将子标签，解析成 Properties 对象
     if (context == null) {
@@ -203,7 +205,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             Class<?> clazz = Resources.classForName(type);
             // 注册到 typeAliasRegistry 中
             if (alias == null) {
-              typeAliasRegistry.registerAlias(clazz);
+              typeAliasRegistry.registerAlias(clazz);//扫描＠ Alia s i.主解，完成注册
             } else {
               typeAliasRegistry.registerAlias(alias, clazz);
             }
@@ -264,7 +266,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       // 读取子标签们，为 Properties 对象
       Properties defaults = context.getChildrenAsProperties();
-      // 读取 resource 和 url 属性
+      //解析＜properties ＞的 resource 和 url ,It,性 ， 这两个属性用于确定 properties 配置文件的位置
       String resource = context.getStringAttribute("resource");
       String url = context.getStringAttribute("url");
       // resource 和 url 都存在的情况下，抛出 BuilderException 异常

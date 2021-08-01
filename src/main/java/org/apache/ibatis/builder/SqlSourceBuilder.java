@@ -41,19 +41,19 @@ public class SqlSourceBuilder extends BaseBuilder {
 
   /**
    * 执行解析原始 SQL ，成为 SqlSource 对象
-   * @param originalSql
-   * @param parameterType
-   * @param additionalParameters
+   * @param originalSql  是经过 SqlNode . apply （）方法处理之后的 SQL 语句
+   * @param parameterType 是用户传入的实参类型
+   * @param additionalParameters  记录形参与实参的对应关系，其实就是经过 SqlNode . apply （）方法处理后的
    * @return
    */
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
-    // <1> 创建 ParameterMappingTokenHandler 对象
+    //创建 ParameterMappingTokenHandler 对象，它是解析 ” ＃｛｝ ”占位符中的参数属性以及替换占位符的核心
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
-    // <2> 创建 GenericTokenParser 对象
+    //使用 GenericTokenParser 与 ParameterMappingTokenHandler 配合解析 ” ＃｛｝ ”占位符
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
     // <3> 执行解析
     String sql = parser.parse(originalSql);
-    // <4> 创建 StaticSqlSource 对象
+    // 创建 StaticSqlSource ，其中封装了占位符被替换成 ” ？ ”的 SQL 语句以及参数对应的 ParameterMapping集合
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
@@ -84,7 +84,7 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
-      // <1> 构建 ParameterMapping 对象，并添加到 parameterMappings 中
+      //创建一个 ParameterMapping 对象，并添加到 parameterMappings 集合中保存
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }

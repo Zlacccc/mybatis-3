@@ -72,6 +72,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private static final Object DEFERRED = new Object();
 
+  //关联的 Executor 、 Configuration 、 MappedStatement 、 RowBounds 对象
   private final Executor executor;
   private final Configuration configuration;
   private final MappedStatement mappedStatement;
@@ -204,7 +205,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   //
   // HANDLE RESULT SETS
 
-  //
+  //通过 select查询数据库得到的结果集由 DefaultResultSetHandler.handleResultSets（）方法
+  //进行处理，该方法不仅可以处理 Statement 、 PreparedStatement 产生的结果集，还可以处理
+  //CallableStatement 调用存储过程产生 的多结果集
   @Override
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());

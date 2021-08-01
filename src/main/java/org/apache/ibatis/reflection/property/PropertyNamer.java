@@ -22,6 +22,11 @@ import org.apache.ibatis.reflection.ReflectionException;
 /**
  * @author Clinton Begin
  */
+
+/**
+ * PropertyNamer 是另 一个工具类 ，提供了下列静态方法帮助完成方法名到属性名的转换，以
+ * 及多种检测操作 。
+ */
 public final class PropertyNamer {
 
   private PropertyNamer() {

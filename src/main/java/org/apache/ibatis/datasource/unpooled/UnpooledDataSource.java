@@ -42,18 +42,15 @@ public class UnpooledDataSource implements DataSource {
    */
   private ClassLoader driverClassLoader;
   /**
-   * Driver 属性
+   * Driver 属性 数据库连接驱动的相关配置
    */
   private Properties driverProperties;
   /**
-   * 已注册的 Driver 映射
-   *
-   * KEY：Driver 类名
-   * VALUE：Driver 对象
+   * 缓存所有 已注册的数据库连接驱动
    */
   private static Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
   /**
-   * Driver 类名
+   * 数据库连接的驱动名称
    */
   private String driver;
   /**
@@ -244,9 +241,11 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
-    //初始化 Driver
+    //初始化数据库驱动
     initializeDriver();
+    //创建真正的数据库连接
     Connection connection = DriverManager.getConnection(url, properties);
+    //配置数据库连接的 autoCommit 和隔离级别
     configureConnection(connection);
     return connection;
   }

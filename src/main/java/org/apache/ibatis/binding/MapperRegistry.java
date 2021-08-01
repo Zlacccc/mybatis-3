@@ -39,7 +39,7 @@ public class MapperRegistry {
   /**
    * MapperProxyFactory 的映射
    *
-   * KEY：Mapper 接口
+   * 记录了 Mapper 接口与对应 MapperProxyFactory 之间的关系
    */
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 

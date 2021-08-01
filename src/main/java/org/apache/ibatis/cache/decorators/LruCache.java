@@ -25,7 +25,8 @@ import org.apache.ibatis.cache.Cache;
  *
  * @author Clinton Begin
  *
- * 基于最少使用的淘汰机制的 Cache 实现类。
+ * LruCache 是按照近期最少使用算法（ Least Recently Used, LRU ）进行缓存清理的装饰器，
+ * 在需要清理缓存时 ， 它会清除最近最少使用 的缓存工页
  */
 public class LruCache implements Cache {
   /**
@@ -33,7 +34,7 @@ public class LruCache implements Cache {
    */
   private final Cache delegate;
   /**
-   * 基于 LinkedHashMap 实现淘汰机制
+   * 基于 LinkedHashMap 实现淘汰机制  LinkedHashMap<Obj ect, Object＞类型对象 ，它是一个有序的 HashMap ，用于记录 key 最近的使用情况
    */
   private Map<Object, Object> keyMap;
   /**

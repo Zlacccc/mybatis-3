@@ -314,18 +314,18 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMapNode.getStringAttribute("resultType",
                 resultMapNode.getStringAttribute("javaType"))));
     // <1> 解析 type 对应的类 获得 id、type、extends、autoMapping 属性，并解析 type 对应的类型。
-    Class<?> typeClass = resolveClass(type);
+    Class<?> typeClass = resolveClass(type);//解析 type 类型
     if (typeClass == null) {
       typeClass = inheritEnclosingType(resultMapNode, enclosingType);
     }
     Discriminator discriminator = null;
-    // <2> 创建 ResultMapping 集合
+    // 该集合用于记录解析的结
     List<ResultMapping> resultMappings = new ArrayList<>();
     resultMappings.addAll(additionalResultMappings);
-    // <2> 遍历 <resultMap /> 的子节点
+    // 处理 ＜ resultMap ＞的子节点
     List<XNode> resultChildren = resultMapNode.getChildren();
     for (XNode resultChild : resultChildren) {
-      // <2.1> 处理 <constructor /> 节点
+      // 处理＜ constructor ＞ 节，占、
       if ("constructor".equals(resultChild.getName())) {
         processConstructorElement(resultChild, typeClass, resultMappings);
       } else if ("discriminator".equals(resultChild.getName())) {

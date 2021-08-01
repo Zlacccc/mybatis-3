@@ -32,13 +32,16 @@ import org.apache.ibatis.logging.LogFactory;
  *
  * @author Ben Gunter
  */
+//虚拟文件系统 （ Virtual File System ） ， 它用来查找指定路径下的资源
 public abstract class VFS {
   private static final Log log = LogFactory.getLog(VFS.class);
 
   /** The built-in implementations. */
+  //记录 了 MyBatis 提供的两个 VFS 实现类
   public static final Class<?>[] IMPLEMENTATIONS = { JBoss6VFS.class, DefaultVFS.class };
 
   /** The list to which implementations are added by {@link #addImplClass(Class)}. */
+  //记录 了 用户自定义的 VFS 实现类 。 VFS . addimplClass （）方法会将指定的 VFS 实现对应的 Class 对象添加 USER IMPLEMENTATIONS 集合中
   public static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
   /** Singleton instance holder. */

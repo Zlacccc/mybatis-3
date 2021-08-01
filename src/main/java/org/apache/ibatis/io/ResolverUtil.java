@@ -214,13 +214,14 @@ public class ResolverUtil<T> {
    *        classes, e.g. {@code net.sourceforge.stripes}
    */
   public ResolverUtil<T> find(Test test, String packageName) {
-    String path = getPackagePath(packageName);
+    String path = getPackagePath(packageName);//根据包名获取其对应的路径
 
     try {
+      //通过 VFS . list （）查找 packageName 包下的所有资源
       List<String> children = VFS.getInstance().list(path);
       for (String child : children) {
         if (child.endsWith(".class")) {
-          addIfMatching(test, child);
+          addIfMatching(test, child);//检测该类是否符合 test 条件
         }
       }
     } catch (IOException ioe) {

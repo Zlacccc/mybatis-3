@@ -25,15 +25,22 @@ public class PoolState {
 
   protected PooledDataSource dataSource;
 
-  protected final List<PooledConnection> idleConnections = new ArrayList<>();
-  protected final List<PooledConnection> activeConnections = new ArrayList<>();
-  protected long requestCount = 0;
-  protected long accumulatedRequestTime = 0;
+  protected final List<PooledConnection> idleConnections = new ArrayList<>();//空闲的 PooledConnection 集合
+  protected final List<PooledConnection> activeConnections = new ArrayList<>();//活跃的 PooledConnection 集合
+  protected long requestCount = 0;//请求数据库连接的次数
+  protected long accumulatedRequestTime = 0;//获取连接的累积时间
+  //checkoutTime 表示应用从连接池中取出连接，到归还连接这段时长，
+  //accumulatedCheckoutTime 记录了所有连接累积的 checkoutTime 时长
   protected long accumulatedCheckoutTime = 0;
+  //当连接长时间未归还给连接池时，会被认为该连接超时，claimedOverdueConnectionCount 记录了超时的连接个数
   protected long claimedOverdueConnectionCount = 0;
+  //累积超时时间
   protected long accumulatedCheckoutTimeOfOverdueConnections = 0;
+  //累积等待时间
   protected long accumulatedWaitTime = 0;
+  //等待次数
   protected long hadToWaitCount = 0;
+  //无效的连接数
   protected long badConnectionCount = 0;
 
   public PoolState(PooledDataSource dataSource) {

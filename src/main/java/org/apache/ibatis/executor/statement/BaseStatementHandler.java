@@ -43,11 +43,15 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final Configuration configuration;
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
+  //记录使用的 ResultSetHandler 对象， 丘如前文所述，它的主要功能是将结采集映射成结采对象
   protected final ResultSetHandler resultSetHandler;
+  //记录使用的 ParameterHandler 对象， ParameterHandler 的主要功能是为 SQL 语句绑定实参 ，也就是使用传入的实参替换 SQL t吾句的中 ’ ？ ”占 位符
   protected final ParameterHandler parameterHandler;
-
+  //记录执行 SQL 语句的 Executor 对象
   protected final Executor executor;
+  //记录 SQL t吾句对应的 MappedStatement  对象
   protected final MappedStatement mappedStatement;
+  //RowBounds 记录了用户设置的 offset 和 limit ，用于在结果集中定位映射的起始位置和结束位置
   protected final RowBounds rowBounds;
 
   protected BoundSql boundSql;

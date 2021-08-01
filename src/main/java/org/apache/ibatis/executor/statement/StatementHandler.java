@@ -44,7 +44,7 @@ public interface StatementHandler {
 
 
   /**
-   * 设置 Statement 对象的参数
+   * 绑定 statement 执行时所需的实参
    *
    * @param statement Statement 对象
    */
@@ -53,7 +53,7 @@ public interface StatementHandler {
 
 
   /**
-   * 添加 Statement 对象的批量操作
+   * 批量执行 SQL 语句
    *
    * @param statement Statement 对象
    */
@@ -61,7 +61,7 @@ public interface StatementHandler {
       throws SQLException;
 
   /**
-   * 执行写操作
+   * 执行 update/insert/delete 语句
    *
    * @param statement Statement 对象
    * @return 影响的条数

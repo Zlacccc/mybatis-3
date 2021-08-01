@@ -29,7 +29,7 @@ import org.apache.ibatis.cursor.Cursor;
  */
 public interface ResultSetHandler {
   /**
-   * 处理 {@link java.sql.ResultSet} 成映射的对应的结果
+   * 处理结采集，生成相应的结果对象集合
    *
    * @param stmt Statement 对象
    * @param <E> 泛型
@@ -37,7 +37,7 @@ public interface ResultSetHandler {
    */
   <E> List<E> handleResultSets(Statement stmt) throws SQLException;
   /**
-   * 处理 {@link java.sql.ResultSet} 成 Cursor 对象
+   * 处理结采集，返回相应的游标对象
    *
    * @param stmt Statement 对象
    * @param <E> 泛型
@@ -45,6 +45,8 @@ public interface ResultSetHandler {
    */
   <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException;
 
+
+//处理存储过程的输出参数
   void handleOutputParameters(CallableStatement cs) throws SQLException;
 
 }

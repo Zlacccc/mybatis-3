@@ -26,23 +26,21 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  *
  *
- * 参数映射
+ * 参数映射  ParameterMapping 中记录了“＃｛｝”占位符中的参数属性
  */
 public class ParameterMapping {
 
   private Configuration configuration;
   /**
-   * 属性的名字
+   *传入进来的参数 name
    */
   private String property;
   /**
-   * 参数类型。
-   *
-   * 目前只需要关注 ParameterMode.IN 的情况，另外的 OUT、INOUT 是在存储过程中使用，暂时无视
+   * 输入参数还是输 出参数
    */
   private ParameterMode mode;
   /**
-   * Java 类型
+   * 参数的 Java 类型
    */
   private Class<?> javaType = Object.class;
   /**
@@ -54,13 +52,14 @@ public class ParameterMapping {
    */
   private Integer numericScale;
   /**
-   * TypeHandler 对象
+   * 参数对应的 Type Handler 对象
    *
    * {@link Builder#resolveTypeHandler()}
    */
   private TypeHandler<?> typeHandler;
+  //参数对应的 ResultMap 的 Id
   private String resultMapId;
-  private String jdbcTypeName;
+  private String jdbcTypeName;//参数的 j dbcTypeName 属性
   /**
    * 表达式。
    *

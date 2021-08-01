@@ -69,7 +69,7 @@ public abstract class BaseExecutor implements Executor {
    */
   protected PerpetualCache localCache;
   /**
-   * 本地输出类型的参数的缓存
+   *  一级缓存，用于缓存输出类型的参数
    */
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;

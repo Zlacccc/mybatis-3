@@ -35,7 +35,7 @@ public interface TransactionFactory {
    */
   /**
    *
-   * 设置工厂的属性
+   * 设置工厂的属性  自己置 TransactionFactory 对象，一般紧跟在创建完成之后 ， 完成对 TransactionFacto ry 的自 定义配置
    *
    * @param props 属性
    */

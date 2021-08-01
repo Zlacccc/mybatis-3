@@ -123,7 +123,7 @@ public class CachingExecutor implements Executor {
         // <2.3> 从二级缓存中，获取结果
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
-          // <2.4.1> 如果不存在，则从数据库中查询
+          // <2.4.1> 如果不存在
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
           // <2.4.2> 缓存结果到二级缓存中
           // 缓存结果到二级缓存中。😈 当然，正如上文所言，实际上，此处结果还没添加到二级缓存中。

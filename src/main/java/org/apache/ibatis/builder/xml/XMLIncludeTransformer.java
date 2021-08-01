@@ -44,7 +44,7 @@ public class XMLIncludeTransformer {
   }
 
   public void applyIncludes(Node source) {
-    // <1> 创建 variablesContext ，并将 configurationVariables 添加到其中
+    // 获取 mybatis-config.xml 中 ＜properties ＞节点下定义的变量集合
     Properties variablesContext = new Properties();
     Properties configurationVariables = configuration.getVariables();
     Optional.ofNullable(configurationVariables).ifPresent(variablesContext::putAll);
@@ -60,11 +60,11 @@ public class XMLIncludeTransformer {
   private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
     // <1> 如果是 <include /> 标签
     if (source.getNodeName().equals("include")) {
-      // <1.1> 获得 <sql /> 对应的节点
+      // 查找 refid 属性指向 的 ＜sql＞节点，返回的是其深克隆的 Node 对象
       Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
-      // <1.2> 获得包含 <include /> 标签内的属性
+      // 解析＜ include ＞ 节点下的 ＜property ＞ 节点，将得到的键位对添加到 variablesContext 中，并形成新的 Properties 对象返回，用于替换占位符
       Properties toIncludeContext = getVariablesContext(source, variablesContext);
-      // <1.3> 递归调用 #applyIncludes(...) 方法，继续替换。注意，此处是 <sql /> 对应的节点
+      // 递归处理＜ include ＞节点， 在 ＜sql＞节点中可能会使用 ＜include＞ 引用了其他 SQL 片段
       applyIncludes(toInclude, toIncludeContext, true);
       if (toInclude.getOwnerDocument() != source.getOwnerDocument()) {
         toInclude = source.getOwnerDocument().importNode(toInclude, true);

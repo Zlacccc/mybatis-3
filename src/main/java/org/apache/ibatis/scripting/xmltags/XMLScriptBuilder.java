@@ -103,7 +103,7 @@ public class XMLScriptBuilder extends BaseBuilder {
         String data = child.getStringBody("");
         // <2.1.2> 创建 TextSqlNode 对象
         TextSqlNode textSqlNode = new TextSqlNode(data);
-        // <2.1.2.1> 如果是动态的 TextSqlNode 对象
+        // 解析 SQL 语句，如采含有未解析的”$｛｝”占位符，为动态 SQL
         if (textSqlNode.isDynamic()) {
           // 添加到 contents 中
           contents.add(textSqlNode);
@@ -115,7 +115,7 @@ public class XMLScriptBuilder extends BaseBuilder {
         }
         // <2.2> 如果类型是 Node.ELEMENT_NODE
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
-        // <2.2.1> 根据子节点的标签，获得对应的 NodeHandler 对象
+        // 如子节点是一个标签，那么一定是动态 SQL ，并且根据不同的动态标签生成不同的 NodeHandler
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {// 获得不到，说明是未知的标签，抛出 BuilderException 异常
@@ -186,7 +186,7 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
-      // 解析内部的 SQL 节点，成 MixedSqlNode 对象
+      // 调 用 parseDynamicTags （）方法，解析＜where ＞节点 的子节点
       MixedSqlNode mixedSqlNode = parseDynamicTags(nodeToHandle);
       // 创建 WhereSqlNode 对象
       WhereSqlNode where = new WhereSqlNode(configuration, mixedSqlNode);

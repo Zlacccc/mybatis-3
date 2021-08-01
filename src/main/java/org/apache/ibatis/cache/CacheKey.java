@@ -25,7 +25,9 @@ import org.apache.ibatis.reflection.ArrayUtil;
 /**
  * @author Clinton Begin
  *
- * MyBatis 中的缓存键不是一个简单的 String ，而是通过多个对象组成。所以 CacheKey 可以理解成将多个对象放在一起，计算其缓存键。
+ * MyBatis 中因为涉及动态 SQL 等
+ * 多方面因素 ， 其缓存项的 key 不能仅仅通过一个 String 表示，所以 MyBatis 提供了 CacheKey
+ * 类来表示缓存项的 key，在一个 CacheKey 对象中可以封装多个影响缓存项的因素
  */
 public class CacheKey implements Cloneable, Serializable {
 
@@ -43,7 +45,7 @@ public class CacheKey implements Cloneable, Serializable {
    */
   private static final int DEFAULT_HASHCODE = 17;
   /**
-   * hashcode 求值的系数
+   * 参与计算 hashcode ，默认位是 37
    */
   private final int multiplier;
   /**
@@ -60,7 +62,7 @@ public class CacheKey implements Cloneable, Serializable {
   private int count;
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient.  While true if content is not serializable, this is not always true and thus should not be marked transient.
   /**
-   * 计算 {@link #hashcode} 的对象的集合
+   * 由该集合中的所有对象共同决定两个 CacheKey 是否相同
    */
   private List<Object> updateList;
 
@@ -85,8 +87,8 @@ public class CacheKey implements Cloneable, Serializable {
     // 方法参数 object 的 hashcode
     int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
 
+    // 重新计算 count 、 checksum 和 hashcode 的值
     count++;
-    // checksum 为 baseHashCode 的求和
     checksum += baseHashCode;
     baseHashCode *= count;
     // 计算新的 hashcode 值

@@ -39,7 +39,7 @@ import org.apache.ibatis.session.Configuration;
  */
 public final class MappedStatement {
   /**
-   * 资源引用的地址
+   * 节点中的 id属性（包括命名空间前缀）
    */
   private String resource;
   /**
@@ -67,7 +67,7 @@ public final class MappedStatement {
    */
   private ResultSetType resultSetType;
   /**
-   * SqlSource 对象
+   * SqlSource 对象，对应一条 SQL语句
    */
   private SqlSource sqlSource;
   /**
@@ -95,7 +95,7 @@ public final class MappedStatement {
    */
   private boolean resultOrdered;
   /**
-   * SQL 语句类型
+   * SQL 的类型 ， INSERT 、 UPDATE 、 DELETE、 SELECT 或 FLUSH
    */
   private SqlCommandType sqlCommandType;
   /**

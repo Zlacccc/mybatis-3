@@ -29,6 +29,7 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  */
+//主要用于记录解析动态 SQL 语句之后产生的 SQL 语句片段，可以认为它是一个用于记录动态 SQL 语句解析结果的容器。
 public class DynamicContext {
 
   public static final String PARAMETER_OBJECT_KEY = "_parameter";
@@ -38,12 +39,15 @@ public class DynamicContext {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
 
-  private final ContextMap bindings;
+  private final ContextMap bindings;//参数上下文
+  //在 SqlNode 解析动态 SQL 时，会将解析后的 SQL t吾句片段添加到该属性中保存，最终拼凑出一条完成的 SQL 语句
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
   private int uniqueNumber = 0;
 
+  //构造方 法 的第 二个参数/parameterObject，它是运行时用户传入的参数 ， 其 中包含了后续用于替换“ ＃｛｝ ”占位符的实参。
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
+      //对于非 Map 类型的参数，会创建对应的 MetaObject 对象，并封装成 ContextMap 对象
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
       boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
       bindings = new ContextMap(metaObject, existsTypeHandler);
@@ -62,11 +66,11 @@ public class DynamicContext {
     bindings.put(name, value);
   }
 
-  public void appendSql(String sql) {
+  public void appendSql(String sql) {//追加 SQL 片段
     sqlBuilder.add(sql);
   }
 
-  public String getSql() {
+  public String getSql() {//获取解析后的 、完整的 SQL 语句
     return sqlBuilder.toString().trim();
   }
 

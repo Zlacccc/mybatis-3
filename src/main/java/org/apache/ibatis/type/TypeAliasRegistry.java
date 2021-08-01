@@ -127,11 +127,13 @@ public class TypeAliasRegistry {
 
   public void registerAliases(String packageName, Class<?> superType) {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+    //查找指定包下的 superType 类型类
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
     for (Class<?> type : typeSet) {
       // Ignore inner classes and interfaces (including package-info.java)
       // Skip also inner classes. See issue #6
+      //过滤掉略内部类 、接 口 以及抽象类
       if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
         registerAlias(type);
       }
@@ -139,11 +141,12 @@ public class TypeAliasRegistry {
   }
 
   public void registerAlias(Class<?> type) {
-    String alias = type.getSimpleName();
-    Alias aliasAnnotation = type.getAnnotation(Alias.class);
+    String alias = type.getSimpleName();//类的简单名称（不包含包名 ）
+    Alias aliasAnnotation = type.getAnnotation(Alias.class);//读取＠ Alias i主解
     if (aliasAnnotation != null) {
       alias = aliasAnnotation.value();
     }
+    //检测此别名不存在后，会将其记录到 TYPE ALIASES 集合中
     registerAlias(alias, type);
   }
 

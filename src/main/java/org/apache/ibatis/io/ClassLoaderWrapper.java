@@ -25,7 +25,7 @@ import java.net.URL;
  */
 public class ClassLoaderWrapper {
 
-  ClassLoader defaultClassLoader;
+  ClassLoader defaultClassLoader;//应 用 指定的默认类加载
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
@@ -138,16 +138,18 @@ public class ClassLoaderWrapper {
   URL getResourceAsURL(String resource, ClassLoader[] classLoader) {
 
     URL url;
-
+// 遍历 ClassLoader 数纽
     for (ClassLoader cl : classLoader) {
 
       if (null != cl) {
 
         // look for the resource as passed in...
+        //调用 ClassLoader.getResource （）方法查找指定的资源
         url = cl.getResource(resource);
 
         // ...but some class loaders want this leading "/", so we'll add it
         // and try again if we didn't find the resource
+        //尝试以”／”开头，再次查找
         if (null == url) {
           url = cl.getResource("/" + resource);
         }
@@ -203,10 +205,10 @@ public class ClassLoaderWrapper {
 
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
-        classLoader,
-        defaultClassLoader,
-        Thread.currentThread().getContextClassLoader(),
-        getClass().getClassLoader(),
+        classLoader,//参数指定的类加载器
+        defaultClassLoader,// 系统指定的默认类加载器
+        Thread.currentThread().getContextClassLoader(),//当前线程绑定的 类加载器
+        getClass().getClassLoader(),//加载当前类所使用的类加载器
         systemClassLoader};
   }
 

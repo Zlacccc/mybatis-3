@@ -25,11 +25,10 @@ import org.apache.ibatis.cache.Cache;
  *
  * @author Clinton Begin
  *
- * 基于先进先出的淘汰机制的 Cache 实现类。
  *
- * 目前 FifoCache 的逻辑实现上，有一定的问题，主要有两点。
-<1> 处，如果重复添加一个缓存，那么在 keyList 里会存储两个，占用了缓存上限的两个名额。
-<2> 处，在移除指定缓存时，不会移除 keyList 里占用的一个名额。
+ *
+ *  FifoCacbe 是先
+ * 入先出版本的装饰器， 当 向缓存添加数据时，如果缓存项的个数已经达到上限， 则会将缓存中最老（ 即最早进入缓存 ） 的缓存项删除。
  */
 public class FifoCache implements Cache {
   /**
@@ -37,7 +36,7 @@ public class FifoCache implements Cache {
    */
   private final Cache delegate;
   /**
-   * 双端队列，记录缓存键的添加
+   * 双端队列，记录缓存键的添加 用于记 录 key 进入缓存的 先后顺序 ， 使用的是 LinkedList <Object ＞类型的集合对象
    */
   private final Deque<Object> keyList;
   /**
@@ -67,7 +66,7 @@ public class FifoCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
-    // 循环 keyList
+    // 循环 keyList 检测并清理缓存
     cycleKeyList(key);
     delegate.putObject(key, value);
   }

@@ -15,11 +15,14 @@
  */
 package org.apache.ibatis.reflection;
 
+/**
+ * 实现了对 Reflector 对象的创建和缓存
+ */
 public interface ReflectorFactory {
 
-  boolean isClassCacheEnabled();
+  boolean isClassCacheEnabled();//检测该 Ref lectorFactory 对象是否会缓存 Reflector 对象
 
-  void setClassCacheEnabled(boolean classCacheEnabled);
+  void setClassCacheEnabled(boolean classCacheEnabled);//设置是否缓存 Reflector 对象
 
-  Reflector findForClass(Class<?> type);
+  Reflector findForClass(Class<?> type);//创建指定 Class 对应的 Reflector 对象
 }
